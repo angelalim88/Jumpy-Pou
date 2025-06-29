@@ -17,9 +17,16 @@ class Alien extends SpriteComponent with HasGameRef<GoUpGame> {
   @override
   Future<void> onLoad() async {
     sprite = Sprite(await gameRef.images.load('alien.png'));
-    size = Vector2(40, 40);
-    position = Vector2(gameRef.size.x / 2, gameRef.size.y - 180);
+    size = Vector2(45, 40);
+
+    final double groundTopY = gameRef.size.y - 200; // Karena terrain_big tinggi 300
+    position = Vector2(
+      gameRef.size.x / 2,
+      groundTopY - (size.y / 2) + 100  // Alien nempel di atas
+    );
+
     previousY = position.y;
+
     add(RectangleHitbox(collisionType: CollisionType.active));
 
     _setupGyro();

@@ -4,18 +4,28 @@ import 'package:flame/collisions.dart';
 class Platform extends SpriteComponent with HasGameRef {
   final bool isGround;
   final int index;
+  final Vector2 initialPos;
 
-  Platform(Vector2 pos, {required this.isGround, required this.index}) {
-    position = pos;
-  }
+  Platform(this.initialPos, {required this.isGround, required this.index});
 
   @override
   Future<void> onLoad() async {
     sprite = Sprite(
-      await gameRef.images.load(isGround ? 'batu_besar.png' : 'batu_kecil.png'),
+      await gameRef.images.load(
+        isGround ? 'terrain_big.png' : 'batu_kecil.png',
+      ),
     );
-    size = isGround ? Vector2(200, 60) : Vector2(80, 20);
-    anchor = Anchor.center;
+
+    if (isGround) {
+      size = Vector2(gameRef.size.x, 100);
+      anchor = Anchor.center;
+      position = Vector2(gameRef.size.x / 2, (gameRef.size.y - size.y / 2) + 60);
+    } else {
+      size = Vector2(80, 50);
+      anchor = Anchor.center;
+      position = initialPos; // platform kecil pakai posisi random
+    }
+
     add(RectangleHitbox(collisionType: CollisionType.passive));
   }
 }

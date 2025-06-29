@@ -32,17 +32,16 @@ class GoUpGame extends FlameGame with HasCollisionDetection {
     await _setupBackgrounds();
     _generatePlatforms();
 
+    // Ini cara benar: tunggu setiap platform benar2 selesai di add & load.
     for (final plat in platforms) {
-      gameWorld.add(plat);
+      await gameWorld.add(plat);  // await!
     }
 
     alien = Alien();
-    gameWorld.add(alien);
+    await gameWorld.add(alien); // Pastikan alien juga di-load penuh
 
     _setCameraToShowGround();
-
-    reloadButton = ReloadButton();
-    add(reloadButton);
+    overlays.add('GameOverlay');
   }
 
   void _setCameraToShowGround() {
@@ -67,7 +66,7 @@ class GoUpGame extends FlameGame with HasCollisionDetection {
 
   void _generatePlatforms() {
     final random = Random();
-    double currentY = size.y - 80;
+    double currentY = size.y - 50;
     platforms.clear();
 
     platforms
