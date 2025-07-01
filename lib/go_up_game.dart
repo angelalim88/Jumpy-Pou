@@ -4,11 +4,12 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/text.dart';
+import 'package:flutter/material.dart';
 import 'components/alien.dart';
 import 'components/platform.dart';
 import 'components/reload_button.dart';
 
-class GoUpGame extends FlameGame with HasCollisionDetection {
+class GoUpGame extends FlameGame with HasCollisionDetection, ChangeNotifier {
   late Alien alien;
   int score = 0;
   bool isGameOver = false;
@@ -34,7 +35,7 @@ class GoUpGame extends FlameGame with HasCollisionDetection {
 
     // Ini cara benar: tunggu setiap platform benar2 selesai di add & load.
     for (final plat in platforms) {
-      await gameWorld.add(plat);  // await!
+      await gameWorld.add(plat); // await!
     }
 
     alien = Alien();
@@ -94,7 +95,8 @@ class GoUpGame extends FlameGame with HasCollisionDetection {
 
     _generateMorePlatforms();
 
-    if (alien.position.y > size.y + 200) {
+    double bottomCameraWorldY = -(cameraOffsetY) + size.y;
+    if (alien.position.y > bottomCameraWorldY + 100) {
       isGameOver = true;
       overlays.add('GameOverMenu');
     }
@@ -137,57 +139,51 @@ class GoUpGame extends FlameGame with HasCollisionDetection {
     if (!platformsPassed.contains(platformIndex) && platformIndex != 0) {
       score++;
       platformsPassed.add(platformIndex);
+      notifyListeners();
     }
   }
 
   Future<void> reset() async {
-    score = 0;
-    isGameOver = false;
-    platformsPassed.clear();
+  score = 0;
+  isGameOver = false;
+  platformsPassed.clear();
+  notifyListeners(); // Supaya overlay update!
 
-    try {
-      alien.restartGyro();
-    } catch (e) {
-      print("Error restarting gyro: $e");
-    }
-
-    gameWorld.removeAll(gameWorld.children);
-    platforms.clear();
-    backgroundTiles.clear();
-
-    gameWorld.position = Vector2.zero();
-
-    await _setupBackgrounds();
-    _generatePlatforms();
-
-    for (final plat in platforms) {
-      gameWorld.add(plat);
-    }
-
-    alien.position = Vector2(size.x / 2, size.y - 180);
-    alien.velocity = Vector2.zero();
-    alien.previousY = alien.position.y;
-    alien.lastPlatformIndex = 0;
-    alien.horizontalSpeed = 0;
-
-    alien.restartGyro();
-
-    gameWorld.add(alien);
-
-    _setCameraToShowGround();
+  if (alien.isMounted) {
+    alien.removeFromParent();
   }
+
+  gameWorld.removeAll(gameWorld.children);
+  platforms.clear();
+  backgroundTiles.clear();
+
+  gameWorld.position = Vector2.zero();
+
+  await _setupBackgrounds();
+  _generatePlatforms();
+
+  for (final plat in platforms) {
+    await gameWorld.add(plat);
+  }
+
+  alien = Alien();
+  await gameWorld.add(alien); // Ini akan memanggil Alien.onLoad, jadi gyro aktif!
+
+  _setCameraToShowGround();
+}
+
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
 
-    final textPaint = TextPaint(
-      style: TextStyle(
-        color: const Color(0xFFFFFFFF),
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-    textPaint.render(canvas, "Score: $score", Vector2(10, 10));
+    // final textPaint = TextPaint(
+    //   style: TextStyle(
+    //     color: const Color(0xFFFFFFFF),
+    //     fontSize: 24,
+    //     fontWeight: FontWeight.bold,
+    //   ),
+    // );
+    // textPaint.render(canvas, "Score: $score", Vector2(10, 10));
   }
 }

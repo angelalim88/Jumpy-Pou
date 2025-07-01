@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 
-class Platform extends SpriteComponent with HasGameRef {
+class Platform extends SpriteComponent with HasGameRef, CollisionCallbacks {
   final bool isGround;
   final int index;
   final Vector2 initialPos;

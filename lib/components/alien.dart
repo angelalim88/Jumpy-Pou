@@ -43,6 +43,14 @@ class Alien extends SpriteComponent with HasGameRef<GoUpGame> {
     }
   }
 
+  void disposeGyro() {
+    try {
+      _gyroSub.cancel();
+    } catch (e) {
+      print("Error disposing gyro: $e");
+    }
+  }
+
   void restartGyro() {
     try {
       _gyroSub.cancel();

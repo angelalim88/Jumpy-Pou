@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
         builder: (_) => GameWidget<GoUpGame>.controlled(
           gameFactory: GoUpGame.new,
           overlayBuilderMap: {
-            'GameOverlay': (context, game) => GameOverlay(game: game),
+            'GameOverlay': (_, game) => GameOverlay(game: game),
             'GameOverMenu': (BuildContext context, GoUpGame game) {
               return Center(
                 child: Container(
